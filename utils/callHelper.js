@@ -62,7 +62,7 @@ const createLead = async (phoneNumber, entityName) => {
     try {
         const response = await axios(config);
         if (response.data.data.length > 0) {
-            print(`Contact created : ${response.data.data[0].id}`)
+            // console.log(`Contact created : ${response.data.data[0].id}`)
             return response.data.data[0].id;
         } else {
             console.log('Failed to create lead.');
