@@ -181,16 +181,10 @@ const checkCallHistory = async (phoneNumber) => {
         const response = await axios(config);
         const callData = response.data.data;
 
-        if (!callData || callData.length === 0) {
-            return {
-                systemApproved: false,
-                callAttempt: "Not Attempted"
-            };
-        }
-
         const currentTime = moment();
+
         let totalDuration = 0;
-        let callAttempt = "Not Attempted";
+        let callAttempt = false;
 
         callData.forEach(call => {
             const callStartTime = moment(call.Call_Start_Time);
@@ -199,7 +193,7 @@ const checkCallHistory = async (phoneNumber) => {
                 totalDuration += durationInSeconds;
             }
             if (durationInSeconds === 0) {
-                callAttempt = "Attempted";
+                callAttempt = true;
             }
         });
 
@@ -211,7 +205,7 @@ const checkCallHistory = async (phoneNumber) => {
         console.log(`Error fetching or filtering calls: ${error}`);
         return {
             systemApproved: false,
-            callAttempt: "Not Attempted"
+            callAttempt: false
         };
     }
 }
@@ -231,8 +225,8 @@ exports.updateTaskToZohoCRM = async (task) => {
     console.log(`Task Status: ${JSON.stringify(task.entity.status)}`);
 
     const updatedAtDate = new Date(task.entity.updatedAt);
+
     const formattedDate = format(updatedAtDate, 'yyyy-MM-dd HH:mm:ss');
-    
     try {
         const taskData = {
             data: [
@@ -248,12 +242,12 @@ exports.updateTaskToZohoCRM = async (task) => {
                     "kylas_task_owner": task.entity.assignedTo.name || "",
                     "System_Updated": systemApproved ? true : false,
                     "Stutas_Changed_Time": updatedAtDate,
-                    "Call_Attempt": callAttempt
+                    "Call_Attempt": callAttempt ? "Attempted" : "Not Attempted"
                 },
             ],
         };
 
-        console.log(`taskData Body: ${JSON.stringify(taskData)}`);
+        console.log(`taskData Body : ${JSON.stringify(taskData)}`);
 
         const response = await updateTask(taskData, taskId);
 
