@@ -87,8 +87,9 @@ const getLeadIdByPhoneNumber = async (phoneNumber) => {
         }
         else {
             console.log('Entity not found ');
-                //return await createLead(phoneNumber);
-                return null;
+            const leadId = await createLead(phoneNumber);
+                return leadId;
+                // return null;
         }
     } catch (error) {
         console.log('Error in getLeadIdByPhoneNumber function:', error);
