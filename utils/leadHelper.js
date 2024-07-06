@@ -84,9 +84,11 @@ const getLeadIdByPhoneNumber = async (phoneNumber) => {
         const response = await axios(config);
         if (response.data && response.data.data && response.data.data.length > 0) {
             return response.data.data[0].id;
-        }else {
+        }
+        else {
             console.log('Entity not found ');
-                return await createLead(phoneNumber);
+                //return await createLead(phoneNumber);
+                return null;
         }
     } catch (error) {
         console.log('Error in getLeadIdByPhoneNumber function:', error);
