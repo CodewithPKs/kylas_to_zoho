@@ -29,7 +29,7 @@ exports.postLeadToZohoCRM = async (lead) => {
                     First_Name: lead.entity.firstName || "",
                     Last_Name: lead.entity.lastName || "",
                     Phone: (lead.entity.phoneNumbers[0].dialCode + lead.entity.phoneNumbers[0].value) || "",
-                
+        
                     City: lead.entity.city || "",
                     State: lead.entity.state || "",
                     Zip_Code: lead.entity.zipcode || "",
@@ -85,9 +85,9 @@ const getLeadIdByPhoneNumber = async (phoneNumber) => {
         if (response.data && response.data.data && response.data.data.length > 0) {
             return response.data.data[0].id;
         } else {
-            console.log('No lead found with this phone number:', phoneNumber);
-            return null;
-        }
+            console.log('Entity not found ');
+                return await createLead(phoneNumber);
+            }
     } catch (error) {
         console.log('Error in getLeadIdByPhoneNumber function:', error);
         console.log('Lead Phone Not Found:', phoneNumber);
@@ -95,6 +95,41 @@ const getLeadIdByPhoneNumber = async (phoneNumber) => {
     }
 };
 
+
+const createLead = async (phoneNumber) => {
+    const leadData = {
+        data: [
+            {
+                "Phone": phoneNumber,
+                "Last_Name": "Update"
+            }
+        ]
+    };
+
+    const config = {
+        method: 'post',
+        url: 'https://www.zohoapis.in/crm/v2/Leads',
+        headers: {
+            'Authorization': `Zoho-oauthtoken ${ZOHO_CRM_ACCESS_TOKEN}`,
+            'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(leadData)
+    };
+
+    try {
+        const response = await axios(config);
+        if (response.data.data.length > 0) {
+            print(`Contact created : ${response.data.data[0].id}`)
+            return response.data.data[0].id;
+        } else {
+            console.log('Failed to create lead.');
+            return null;
+        }
+    } catch (error) {
+        console.log('Error creating lead:', error.message);
+        return null;
+    }
+};
 
 exports.updateLeadToZohoCRM = async (lead) => {
     let phoneData = lead.entity.phoneNumbers[0].value;
@@ -109,7 +144,9 @@ exports.updateLeadToZohoCRM = async (lead) => {
     const leadId = await getLeadIdByPhoneNumber(phoneData);
     if (leadId == null) {
         console.log('Lead is not updated to Zoho CRM');
-        //await exports.postLeadToZohoCRM(lead);
+        await exports.postLeadToZohoCRM(lead);
+        await exports.updateLeadToZohoCRM(lead);
+        return;
     } else {
         console.log("leadId");
         console.log(leadId);
