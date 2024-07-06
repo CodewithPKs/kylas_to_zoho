@@ -134,7 +134,7 @@ const createLead = async (phoneNumber) => {
 
 
 exports.updateLeadToZohoCRM = async (lead) => {
-    let phoneData = lead.entity.phoneNumbers[0].value;
+    let phoneData = lead.entity.phoneNumbers[0].dialCode + lead.entity.phoneNumbers[0].value;
     console.log("phone number");
     console.log(phoneData);
     console.log(lead);
