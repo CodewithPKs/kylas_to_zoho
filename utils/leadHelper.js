@@ -29,7 +29,7 @@ exports.postLeadToZohoCRM = async (lead) => {
                     First_Name: lead.entity.firstName || "",
                     Last_Name: lead.entity.lastName || "",
                     Phone: (lead.entity.phoneNumbers[0].dialCode + lead.entity.phoneNumbers[0].value) || "",
-        
+                
                     City: lead.entity.city || "",
                     State: lead.entity.state || "",
                     Zip_Code: lead.entity.zipcode || "",
@@ -86,7 +86,7 @@ const getLeadIdByPhoneNumber = async (phoneNumber) => {
             return response.data.data[0].id;
         } else {
             console.log('Entity not found ');
-                return await createLead(phoneNumber);
+                return await createLead(phoneNumber, entityName);
             }
     } catch (error) {
         console.log('Error in getLeadIdByPhoneNumber function:', error);
@@ -94,7 +94,6 @@ const getLeadIdByPhoneNumber = async (phoneNumber) => {
         return null;
     }
 };
-
 
 const createLead = async (phoneNumber) => {
     const leadData = {
@@ -131,6 +130,8 @@ const createLead = async (phoneNumber) => {
     }
 };
 
+
+
 exports.updateLeadToZohoCRM = async (lead) => {
     let phoneData = lead.entity.phoneNumbers[0].value;
     console.log("phone number");
@@ -144,9 +145,7 @@ exports.updateLeadToZohoCRM = async (lead) => {
     const leadId = await getLeadIdByPhoneNumber(phoneData);
     if (leadId == null) {
         console.log('Lead is not updated to Zoho CRM');
-        await exports.postLeadToZohoCRM(lead);
-        await exports.updateLeadToZohoCRM(lead);
-        return;
+        //await exports.postLeadToZohoCRM(lead);
     } else {
         console.log("leadId");
         console.log(leadId);
