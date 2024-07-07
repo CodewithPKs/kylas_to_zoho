@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');  
 const { updateAccessToken } = require("./utils/helpers.js")
 const { setIntervalAsync } = require('set-interval-async/dynamic');
 const lead = require("./routes/lead.js");
@@ -14,6 +15,9 @@ const { ZohoCRMToKylasChatLeads } = require("./utils/ZohoCrmToKylasChatLeads.js"
 
 require("dotenv").config();
 const app = express();
+
+app.use(cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/lead", lead);
