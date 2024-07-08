@@ -30,6 +30,7 @@ exports.updateLeadToCRM = async (req, res) => {
 
 exports.getLatestLeadUpdate = (req, res) => {
     if (latestLeadUpdate) {
+        console.log(`Latest Data : ${latestLeadUpdate}`);
         res.status(200).json(latestLeadUpdate);
     } else {
         res.status(404).send('No lead update found');
