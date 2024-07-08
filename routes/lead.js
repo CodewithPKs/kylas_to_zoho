@@ -7,4 +7,6 @@ router.post('/kylas-Leads', postLeadToCRM);
 
 router.post('/kylas-Leads-update', updateLeadToCRM);
 
+router.get('/latest-lead-update', getLatestLeadUpdate);
+
 module.exports = router;
