@@ -1,5 +1,5 @@
 const express = require("express");
-const { postLeadToCRM, updateLeadToCRM } = require("../controller/lead.js");
+const { postLeadToCRM, updateLeadToCRM , getLatestLeadUpdate} = require("../controller/lead.js");
 
 const router = express.Router();
 
