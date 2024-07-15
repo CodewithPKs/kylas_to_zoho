@@ -1,7 +1,33 @@
 const { json } = require("express");
 const { postLeadToZohoCRM, updateLeadToZohoCRM } = require("../utils/leadHelper.js");
+const Queue = require('bull');
 
-let latestLeadUpdate = null;
+
+const leadUpdateQueue = new Queue('leadUpdateQueue');
+
+leadUpdateQueue.process(async (job) => {
+    const updatedLead = job.data;
+    console.log(`Lead Update Log ${JSON.stringify(updatedLead)}`);
+    await updateLeadToZohoCRM(updatedLead);
+});
+
+
+exports.updateLeadToCRM = async (req, res) => {
+    try {
+        const updatedLead = req.body;
+        console.log(`Req start`);
+        leadUpdateQueue.add(updatedLead);
+        res.status(200).send('Lead update request received successfully');
+    } catch (error) {
+        console.log('Error processing webhook request for Lead:', error);
+        res.status(200).json({ message: 'Error processing update webhook request', error: error.message });
+    }
+};
+
+leadUpdateQueue.on('failed', (job, err) => {
+    console.log(`Job ${job.id} failed with error ${err.message}`);
+});
+
 
 exports.postLeadToCRM = async (req, res) => {
     try {
@@ -15,18 +41,6 @@ exports.postLeadToCRM = async (req, res) => {
     }
 }
 
-exports.updateLeadToCRM = async (req, res) => {
-    try {
-        const updatedLead = req.body;
-        console.log(`Lead Update Log ${JSON.stringify(updatedLead)}`);
-        latestLeadUpdate = updatedLead;
-        await updateLeadToZohoCRM(updatedLead);
-        res.status(200).send('Lead Update successfully');
-    } catch (error) {
-        console.log('Error processing webhook request for Lead :', error);
-        res.status(200).json({ message: 'Error processing Update webhook request', error: error.message });
-    }
-}
 
 exports.getLatestLeadUpdate = (req, res) => {
     if (latestLeadUpdate) {
