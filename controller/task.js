@@ -1,5 +1,9 @@
 const { PostTaskzoho, updateTaskToZohoCRM } = require("../utils/taskHelper");
 
+let TaskUpdateQueue = [];
+let isProcessing = false;
+
+
 exports.postTaskToCRM = async (req, res) => {
     try {
         const newTask = req.body;
@@ -12,15 +16,31 @@ exports.postTaskToCRM = async (req, res) => {
     }
 }
 
+
+const processQueue = async () => {
+    if (isProcessing) return;
+
+    isProcessing = true;
+    while (TaskUpdateQueue.length > 0) {
+        const updatedTask = TaskUpdateQueue.shift();
+        try {
+            console.log(`Task Update Log ${JSON.stringify(updatedTask)}`);
+            await updateTaskToZohoCRM(updatedTask);
+        } catch (error) {
+            console.log('Error processing lead update:', error);
+        }
+    }
+    isProcessing = false;
+};
+
+
 exports.updateTaskToCRM = async (req, res) => {
     try {
-    
         const updatedTask = req.body;
+        TaskUpdateQueue.push(updatedTask);
 
-        console.log(`Update Task Log ${JSON.stringify(updatedTask)}`);
-
-        await updateTaskToZohoCRM(updatedTask);
-        return res.status(200).send('Task Updated successfully');
+        res.status(200).send('Task update request received successfully');
+        processQueue();
     } catch (error) {
         console.log('Error processing webhook request:', error);
         return res.status(500).send('Error processing webhook request');
