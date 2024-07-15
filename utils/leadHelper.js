@@ -122,10 +122,11 @@ const createLead = async (phoneNumber) => {
     try {
         const response = await axios(config);
         console.log(`Lead creation response ${response}`);
-        console.log(`Lead creation response JSOn ${JSON.stringify(response)}`);
+        console.log(`Lead creation response JSON ${JSON.stringify(response.data)}`);
         if (response.data.data.length > 0) {
-            // console.log(`Contact created : ${response.data.data[0].id}`)
-            return response.data.data[0].id;
+            const leadId = response.data.data[0].details.id;
+            console.log(`Lead created with ID: ${leadId}`);
+            return leadId;
         } else {
             console.log('Failed to create lead.');
             return null;
