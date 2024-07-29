@@ -1,6 +1,4 @@
 const { PostTaskzoho, updateTaskToZohoCRM } = require("../utils/taskHelper");
-const db = require('../routes/firebase');
-const { json } = require("express");
 
 
 let TaskUpdateQueue = [];
@@ -16,7 +14,6 @@ exports.postTaskToCRM = async (req, res) => {
         console.log(`TaskID : ${JSON.stringify(taskID)}, Taskowner : ${JSON.stringify(taskOwner)}`);
         console.log(`Task Data : ${JSON.stringify(newTask)}`);
         await PostTaskzoho(newTask);
-        await postTaskToFirebase(taskID, taskOwner);
         latestTaskUpdate = newTask;
         return res.status(200).send('Task processed successfully');
     } catch (error) {
@@ -24,34 +21,6 @@ exports.postTaskToCRM = async (req, res) => {
         return res.status(500).send('Error processing webhook request');
     }
 }
-
-
-const postTaskToFirebase = async (taskID, taskOwner) => {
-    console.log(`Starting postTaskToFirebase with taskID: ${taskID}, taskOwner: ${taskOwner}`);
-    const taskDocRef = db.collection('Kylas Task Data').doc(taskOwner);
-    const taskDoc = await taskDocRef.get();
-
-    if (taskDoc.exists) {
-        const existingData = taskDoc.data();
-        const updatedStoreIDs = existingData.storeIDs ? existingData.storeIDs : [];
-        console.log(`Updated storeIDs for taskOwner: ${taskOwner} before modification:`, updatedStoreIDs);
-
-        if (!updatedStoreIDs.includes(taskID)) {
-            updatedStoreIDs.push(taskID);
-            console.log(`TaskID ${taskID} added to storeIDs. Updated storeIDs:`, updatedStoreIDs);
-            await taskDocRef.update({ storeIDs: updatedStoreIDs });
-            console.log(`Successfully updated taskOwner: ${taskOwner} with new storeIDs:`, updatedStoreIDs);
-        } else {
-            console.log(`TaskID ${taskID} already exists in storeIDs for taskOwner: ${taskOwner}`);
-        }
-    } else {
-        await taskDocRef.set({ storeIDs: [taskID] });
-        console.log(`Successfully created new document for taskOwner: ${taskOwner} with storeIDs: [${taskID}]`);
-    }
-};
-
-
-
 
 const processQueue = async () => {
     if (isProcessing) return;
