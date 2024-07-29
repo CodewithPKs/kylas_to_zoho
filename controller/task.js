@@ -1,5 +1,6 @@
 const { PostTaskzoho, updateTaskToZohoCRM } = require("../utils/taskHelper");
 const db = require('../routes/firebase');
+const { json } = require("express");
 
 
 let TaskUpdateQueue = [];
@@ -12,7 +13,7 @@ exports.postTaskToCRM = async (req, res) => {
         const taskID = newTask.entity.id;
         const taskOwner = newTask.entity.assignedTo.name;
 
-        console.log(`TaskID : ${taskID}, Taskowner : ${taskOwner}`);
+        console.log(`TaskID : ${JSON.stringify(taskID)}, Taskowner : ${JSON.stringify(taskOwner)}`);
         console.log(`Task Data : ${JSON.stringify(newTask)}`);
         await PostTaskzoho(newTask);
         await postTaskToFirebase(taskID, taskOwner);
