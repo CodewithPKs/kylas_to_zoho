@@ -8,10 +8,10 @@ let latestTaskUpdate = null
 exports.postTaskToCRM = async (req, res) => {
     try {
         const newTask = req.body;
-        const taskID = newTask.entity.id;
-        const taskOwner = newTask.entity.assignedTo.name;
+        // const taskID = newTask.entity.id;
+        // const taskOwner = newTask.entity.assignedTo.name;
 
-        console.log(`TaskID : ${JSON.stringify(taskID)}, Taskowner : ${JSON.stringify(taskOwner)}`);
+        // console.log(`TaskID : ${JSON.stringify(taskID)}, Taskowner : ${JSON.stringify(taskOwner)}`);
         console.log(`Task Data : ${JSON.stringify(newTask)}`);
         await PostTaskzoho(newTask);
         latestTaskUpdate = newTask;

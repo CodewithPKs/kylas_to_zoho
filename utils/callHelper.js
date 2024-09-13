@@ -109,6 +109,52 @@ const createContact = async (phoneNumber) => {
     }
 };
 
+const getOwnerByNumber = async(phoneNumber) => {
+    try {
+        const GettingData = {
+            "fields": [
+                "firstName", "lastName", "ownerId", "state", "pipelineStage", "phoneNumbers",
+                "pipelineStageReason", "createdAt", "updatedAt", "utmSource", "utmCampaign",
+                "utmMedium", "utmContent", "utmTerm", "id", "recordActions", "customFieldValues"
+            ],
+            "jsonRule": {
+                "rules": [
+                    {
+                        "id": "multi_field",
+                        "field": "multi_field",
+                        "type": "multi_field",
+                        "input": "multi_field",
+                        "operator": "multi_field",
+                        "value": phoneNumber
+                    }
+                ],
+                "condition": "AND",
+                "valid": true
+            }
+        };
+
+        const response = await axios.post('https://api.kylas.io/v1/search/lead', GettingData, {
+            headers: {
+                'api-key': '1e8d51e4-de78-4394-b5a9-e9d10b1e72d2',
+            }
+        });
+
+        console.log('Kylas Id Getting successfully', response.data);
+
+        if (response.data.metaData && response.data.metaData.idNameStore && response.data.metaData.idNameStore.ownerId) {
+            const ownerIdData = response.data.metaData.idNameStore.ownerId;
+            const ownerName = Object.values(ownerIdData)[0]; 
+            return ownerName;  
+        } else {
+            console.log('Lead or owner name not found');
+            return null;
+        }
+    } catch (error) {
+        console.log('Error getting Id:', error);
+        return null;
+    }
+}
+
 const PostCall = async (Calldata) => {
     const config = {
         method: 'post',
@@ -143,6 +189,7 @@ exports.PostCallzoho = async (call) => {
     console.log(formattedStartTime);
     console.log(call.entity.relatedTo);
 
+    const owner = getOwnerByNumber(call.entity.phoneNumber);
     const relatedEntity = call.entity.relatedTo[0];
     const entityType = relatedEntity.entity;
     const entityName = relatedEntity.name;
@@ -168,7 +215,7 @@ exports.PostCallzoho = async (call) => {
                     "Phone_Number": call.entity.phoneNumber || "",
                     "Call_Status": call.entity.outcome || "",
                     "Outcome": call.entity.outcome || "",
-                    "kylas_call_Owner": call.entity.owner.name || "",
+                    "kylas_call_Owner": owner,
                 }
             ],
         };
